@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion de Rendez-vous Médicaux - V2</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --blue: #20B2AA;
+            --medlight: #e3f2fd;
+            --refusedred: #dc3545;
+            --table-header-bg: #20B2AA;
+            --table-header-text: #ffffff;
+            --table-row-hover: #f8f9fa;
+            --table-border: #e0e0e0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding-bottom: 2rem;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--blue), #20B2AA);
+            color: white;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border: none;
+        }
+        .card-header {
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: 600;
+        }
+        .med-card .card-header {
+            background-color: var(--blue);
+            color: white;
+        }
+        .admin-card .card-header {
+            background-color: var(--blue);
+            color: white;
+        }
+        .patient-card .card-header {
+            background-color: var(--blue);
+            color: white;
+        }
+        .btn-med {
+            background-color: var(--blue);
+            color: white;
+        }
+        .btn-admin {
+            background-color: var(--blue);
+            color: white;
+        }
+        .btn-patient {
+            background-color: var(--blue);
+            color: white;
+        }
+        .btn-refused {
+            background-color: var(--refusedred);
+            color: white;
+        }
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-approved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .login-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .d-flex.justify-content-center {
+            justify-content: center;
+        }
+        .functionality-section {
+            display: none;
+        }
+        .appointment-item {
+            border-left: 4px solid var(--medblue);
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .appointment-item.pending {
+            border-left-color: #ffc107;
+        }
+        .appointment-item.approved {
+            border-left-color: #28a745;
+        }
+        .appointment-item.rejected {
+            border-left-color: #dc3545;
+        }
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
+        }
+        .file-list li {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-list li:last-child {
+            border-bottom: none;
+        }
+        .detail-modal {
+            font-size: 0.95rem;
+        }
+        .detail-modal .row {
+            margin-bottom: 10px;
+        }
+        .detail-modal .col-sm-4 {
+            font-weight: 600;
+        }
+
+        /* Styles modernisés pour les tableaux */
+        .modern-table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .modern-table {
+            margin-bottom: 0;
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            font-size: 0.95rem;
+        }
+
+        .modern-table thead th {
+            background-color: var(--table-header-bg);
+            color: var(--table-header-text);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 18px 16px;
+            border: none;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .modern-table thead th:first-child {
+            border-radius: 0;
+        }
+
+        .modern-table thead th:last-child {
+            border-radius: 0;
+        }
+
+        .modern-table tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--table-border);
+        }
+
+        .modern-table tbody tr:hover {
+            background-color: var(--table-row-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .modern-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .modern-table tbody td {
+            padding: 16px;
+            border: none;
+            vertical-align: middle;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        /* Actions dans les tableaux */
+        .table-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .action-btn.edit {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .action-btn.edit:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .action-btn.delete {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .action-btn.delete:hover {
+            background-color: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .action-btn.view {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .action-btn.view:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+        }
+
+        /* Badge de spécialité */
+        .specialty-badge {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        /* Amélioration responsive */
+        @media (max-width: 768px) {
+            .modern-table-container {
+                overflow-x: auto;
+            }
+            
+            .modern-table {
+                min-width: 600px;
+            }
+            
+            .modern-table thead th,
+            .modern-table tbody td {
+                padding: 12px 8px;
+                font-size: 0.85rem;
+            }
+            
+            .action-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+        }
+
+        /* Table vide */
+        .empty-table {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-table i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-table h4 {
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .empty-table p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-4" ng-app="medApp" ng-controller="MainController as main">
+        <!-- Header -->
+        <div class="header text-center">
+            <h1><i class="fas fa-hospital-user me-2"></i>Gestionnaire de Rendez-vous Médicaux CHU </h1>
+            <p class="lead">Plateforme de gestion des rendez-vous pour médecins, administrateurs et patients</p>
+        </div>
+
+        <!-- Login Section -->
+        <div class="row justify-content-center" id="loginSection">
+            <div class="col-md-8">
+                <div class="login-section text-center">
+                    <h3 class="mb-4">Connectez-vous en tant que :</h3>
+                    <div class="d-flex justify-content-center gap-4 flex-wrap">
+                        <button class="btn btn-lg btn-med" ng-click="main.login('medecin')">
+                            <i class="fas fa-user-md me-2"></i>Médecin
+                        </button>
+                        <button class="btn btn-lg btn-admin" ng-click="main.login('admin')">
+                            <i class="fas fa-user-cog me-2"></i>Administrateur
+                        </button>
+                        <button class="btn btn-lg btn-patient" ng-click="main.login('patient')">
+                            <i class="fas fa-user-injured me-2"></i>Patient
+                        </button>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-muted">Données de démonstration - Toutes les fonctionnalités sont simulées</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doctor Functionality -->
+        <div class="functionality-section" id="medecinSection">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card med-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-user-md me-2"></i>Espace Médecin</span>
+                            <button class="btn btn-sm btn-light" ng-click="main.logout()">
+                                <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <h4 class="mb-4">Créer un nouveau rendez-vous</h4>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <!-- Nouveau: Sélection de la spécialité -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Spécialité</label>
+                                        <select class="form-select" ng-model="main.selectedSpecialty" ng-change="main.onSpecialtyChange()">
+                                            <option value="">Choisir une spécialité</option>
+                                            <option ng-repeat="specialty in main.specialties" value="{{specialty.id}}">
+                                                {{specialty.name}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Nouveau: Sélection du médecin (filtré par spécialité) -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Médecin</label>
+                                        <select class="form-select" ng-model="main.newAppointment.medecinId" ng-disabled="!main.selectedSpecialty">
+                                            <option value="">Choisir un médecin</option>
+                                            <option ng-repeat="medecin in main.filteredMedecins" value="{{medecin.id}}">
+                                                Dr. {{medecin.name}} - {{medecin.specialty}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Patient</label>
+                                        <select class="form-select" ng-model="main.newAppointment.patientId">
+                                            <option ng-repeat="patient in main.patients" value="{{patient.id}}">
+                                                {{patient.name}} ({{patient.id}})
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Date du rendez-vous</label>
+                                        <input type="date" class="form-control" ng-model="main.newAppointment.date">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Heure</label>
+                                        <input type="time" class="form-control" ng-model="main.newAppointment.time">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Motif de consultation</label>
+                                        <textarea class="form-control" rows="3" ng-model="main.newAppointment.reason"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Durée (minutes)</label>
+                                        <select class="form-select" ng-model="main.newAppointment.duration">
+                                            <option>15</option>
+                                            <option>30</option>
+                                            <option>45</option>
+                                            <option>60</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Documents médicaux (analyses, ordonnances...)</label>
+                                        <input type="file" class="form-control" multiple id="medicalFiles">
+                                        <small class="text-muted">Vous pouvez sélectionner plusieurs fichiers</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-3">
+                                <button class="btn btn-med btn-lg" ng-click="main.createAppointment()" ng-disabled="!main.isAppointmentFormValid()">
+                                    <i class="fas fa-calendar-plus me-2"></i>Créer le Rendez-vous
+                                </button>
+                            </div>
+                            
+                            <hr class="my-4">
+                            
+                            <h4 class="mb-4">Rendez-vous créés</h4>
+                            <div class="modern-table-container">
+                                <div ng-if="(main.appointments | filter:{createdBy: 'medecin'}).length === 0" class="empty-table">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <h4>Aucun rendez-vous créé</h4>
+                                    <p>Les rendez-vous que vous créez apparaîtront ici</p>
+                                </div>
+                                <table ng-if="(main.appointments | filter:{createdBy: 'medecin'}).length > 0" class="modern-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Patient</th>
+                                            <th>Médecin</th>
+                                            <th>Date</th>
+                                            <th>Heure</th>
+                                            <th>Motif</th>
+                                            <th>Documents</th>
+                                            <th>Statut</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="app in main.appointments | filter:{createdBy: 'medecin'}">
+                                            <td><strong>{{main.getPatientName(app.patientId)}}</strong></td>
+                                            <td>{{main.getMedecinName(app.medecinId)}}</td>
+                                            <td>{{main.formatDate(app.date)}}</td>
+                                            <td>{{main.formatTime(app.time)}}</td>
+                                            <td>{{app.reason}}</td>
+                                            <td>
+                                                <span ng-if="app.documents && app.documents.length > 0">
+                                                    <i class="fas fa-file-alt me-1"></i>{{app.documents.length}} fichier(s)
+                                                </span>
+                                                <span ng-if="!app.documents || app.documents.length === 0" class="text-muted">
+                                                    Aucun
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="status-badge" ng-class="{
+                                                    'status-pending': app.status === 'pending',
+                                                    'status-approved': app.status === 'approved',
+                                                    'status-rejected': app.status === 'rejected'
+                                                }">
+                                                    {{app.status === 'pending' ? 'En attente' : (app.status === 'approved' ? 'Validé' : 'Rejeté')}}
+                                                </span>
+                                                <div ng-if="app.refusalReason" class="small text-muted mt-1">
+                                                    Motif: {{app.refusalReason}}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="table-actions">
+                                                    <button class="action-btn edit" title="Modifier">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="action-btn view" title="Voir détails">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Functionality -->
+        <div class="functionality-section" id="adminSection">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card admin-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-user-cog me-2"></i>Espace Administrateur</span>
+                            <button class="btn btn-sm btn-light" ng-click="main.logout()">
+                                <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <h4 class="mb-4">Rendez-vous en attente de validation</h4>
+                            
+                            <div ng-if="(main.appointments | filter:{status: 'pending'}).length === 0" class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>Aucun rendez-vous en attente de validation.
+                            </div>
+                            
+                            <div ng-repeat="app in main.appointments | filter:{status: 'pending'}" class="appointment-item pending">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h5>{{main.getPatientName(app.patientId)}} - {{main.formatDate(app.date)}} à {{app.time}}</h5>
+                                        <p class="mb-1"><strong>Médecin:</strong> {{main.getMedecinName(app.medecinId)}}</p>
+                                        <p class="mb-1"><strong>Motif:</strong> {{app.reason}} (Durée: {{app.duration}} minutes)</p>
+                                        <p class="mb-1"><strong>Patient:</strong> {{main.getPatientById(app.patientId).name}} ({{app.patientId}})</p>
+                                        <p class="mb-1"><strong>Contact:</strong> {{main.getPatientById(app.patientId).phone}} | {{main.getPatientById(app.patientId).email}}</p>
+                                        
+                                        <div ng-if="app.documents && app.documents.length > 0" class="mt-2">
+                                            <p class="mb-1"><strong>Documents joints:</strong></p>
+                                            <ul class="file-list">
+                                                <li ng-repeat="doc in app.documents">
+                                                    <span><i class="fas fa-file-pdf text-danger"></i> {{doc.name}}</span>
+                                                    <button class="btn btn-sm btn-outline-primary">Voir</button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <small class="text-muted">Créé par: Dr. Amrani le {{app.creationDate}}</small>
+                                    </div>
+                                    <div class="ms-3">
+                                        <button class="btn btn-success me-2 mb-2" ng-click="main.validateAppointment(app.id, 'approved')">
+                                            <i class="fas fa-check me-1"></i>Valider
+                                        </button>
+                                        <button class="btn btn-refused" ng-click="main.showRefusalReason(app.id)">
+                                            <i class="fas fa-times me-1"></i>Refuser
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <hr class="my-4">
+                            
+                            <h4 class="mb-4">Historique des rendez-vous</h4>
+                            <div class="modern-table-container">
+                                <div ng-if="(main.appointments | filter:{status: '!pending'}).length === 0" class="empty-table">
+                                    <i class="fas fa-history"></i>
+                                    <h4>Aucun historique</h4>
+                                    <p>L'historique des rendez-vous traités apparaîtra ici</p>
+                                </div>
+                                <table ng-if="(main.appointments | filter:{status: '!pending'}).length > 0" class="modern-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Patient</th>
+                                            <th>Médecin</th>
+                                            <th>Date</th>
+                                            <th>Heure</th>
+                                            <th>Motif</th>
+                                            <th>Statut</th>
+                                            <th>Motif de refus</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="app in main.appointments | filter:{status: '!pending'}">
+                                            <td><strong>{{main.getPatientName(app.patientId)}}</strong></td>
+                                            <td>{{main.getMedecinName(app.medecinId)}}</td>
+                                            <td>{{main.formatDate(app.date)}}</td>
+                                           <td>{{main.formatTime(app.time)}}</td>
+                                            <td>{{app.reason}}</td>
+                                            <td>
+                                                <span class="status-badge" ng-class="{
+                                                    'status-pending': app.status === 'pending',
+                                                    'status-approved': app.status === 'approved',
+                                                    'status-rejected': app.status === 'rejected'
+                                                }">
+                                                    {{app.status === 'pending' ? 'En attente' : (app.status === 'approved' ? 'Validé' : 'Rejeté')}}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span ng-if="app.refusalReason">{{app.refusalReason}}</span>
+                                                <span ng-if="!app.refusalReason" class="text-muted">N/A</span>
+                                            </td>
+                                            <td>
+                                                <div class="table-actions">
+                                                    <button class="action-btn view" title="Voir détails">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="action-btn delete" title="Supprimer">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Functionality -->
+        <div class="functionality-section" id="patientSection">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card patient-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-user-injured me-2"></i>Espace Patient</span>
+                            <button class="btn btn-sm btn-light" ng-click="main.logout()">
+                                <i class="fas fa-sign-out-alt me-1"></i>Déconnexion
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>Bienvenue dans votre espace patient. Vous pouvez consulter l'état de vos rendez-vous ci-dessous.
+                            </div>
+                            
+                            <h4 class="mb-4">Mes Rendez-vous</h4>
+                            
+                            <div ng-if="(main.appointments | filter:{patientId: main.currentPatient.id}).length === 0" class="alert alert-warning">
+                                <i class="fas fa-calendar-times me-2"></i>Vous n'avez aucun rendez-vous planifié.
+                            </div>
+                            
+                            <div ng-repeat="app in main.appointments | filter:{patientId: main.currentPatient.id}" class="appointment-item" ng-class="{
+                                'pending': app.status === 'pending',
+                                'approved': app.status === 'approved',
+                                'rejected': app.status === 'rejected'
+                            }">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5>Rendez-vous du {{main.formatDate(app.date)}} à {{main.formatTime(app.time)}}</h5>
+                                        <p class="mb-1"><strong>Médecin:</strong> {{main.getMedecinName(app.medecinId)}}</p>
+                                        <p class="mb-1"><strong>Motif:</strong> {{app.reason}} (Durée: {{app.duration}} minutes)</p>
+                                        <p class="mb-1"><strong>Statut:</strong> 
+                                            <span class="status-badge" ng-class="{
+                                                'status-pending': app.status === 'pending',
+                                                'status-approved': app.status === 'approved',
+                                                'status-rejected': app.status === 'rejected'
+                                            }">
+                                                {{app.status === 'pending' ? 'En attente de validation' : (app.status === 'approved' ? 'Confirmé' : 'Annulé')}}
+                                            </span>
+                                        </p>
+                                        <p ng-if="app.status === 'rejected' && app.refusalReason" class="mb-1"><strong>Motif du refus:</strong> {{app.refusalReason}}</p>
+                                        
+                                        <div ng-if="app.documents && app.documents.length > 0" class="mt-2">
+                                            <p class="mb-1"><strong>Documents médicaux:</strong></p>
+                                            <ul class="file-list">
+                                                <li ng-repeat="doc in app.documents">
+                                                    <span><i class="fas fa-file-pdf text-danger"></i> {{doc.name}}</span>
+                                                    <button class="btn btn-sm btn-outline-primary">Télécharger</button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <small class="text-muted">Créé par: Dr. Amrani</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h5>Informations patient</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Nom:</strong> {{main.currentPatient.name}}</p>
+                                        <p><strong>Email:</strong> {{main.currentPatient.email}}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Téléphone:</strong> {{main.currentPatient.phone}}</p>
+                                        <p><strong>Date de naissance:</strong> {{main.currentPatient.dob}}</p>
+                                        <p><strong>Médecin traitant:</strong> Dr. Amrani</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for refusal reason -->
+        <div class="modal fade" id="refusalModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Motif de refus</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Veuillez indiquer le motif de refus de ce rendez-vous :</p>
+                        <div class="mb-3">
+                            <textarea class="form-control" rows="4" ng-model="main.refusalReason" placeholder="Saisissez le motif de refus..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-refused" ng-click="main.validateAppointment(main.currentAppointmentId, 'rejected')" data-bs-dismiss="modal">Confirmer le refus</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AngularJS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        angular.module('medApp', [])
+        .controller('MainController', function() {
+            var main = this;
+            
+            // Données mockées pour les patients
+            main.patients = [
+                { id: 'PAT001', name: 'Maria martin', email: 'maria.martin@gmail.com', phone: '07 23 45 67 89', dob: '15/05/1980' },
+                { id: 'PAT002', name: 'Amin Dubois', email: 'amin.dubois@gmail.com', phone: '06 34 56 78 90', dob: '22/11/1975' },
+                { id: 'PAT003', name: 'Sofia Leroy', email: 'sofia.leroy@gmail.com', phone: '05 45 67 89 01', dob: '03/07/1992' },
+                { id: 'PAT004', name: 'Janat Petit', email: 'janat.petit@gmail.com', phone: '07 56 78 90 12', dob: '18/12/1988' }
+            ];
+            
+            // Données mockées pour les spécialités
+            main.specialties = [
+                { id: 'CARDIOLOGIE', name: 'Cardiologie' },
+                { id: 'DERMATOLOGIE', name: 'Dermatologie' },
+                { id: 'PEDIATRIE', name: 'Pédiatrie' },
+                { id: 'GYNECOLOGIE', name: 'Gynécologie' },
+                { id: 'OPHTALMOLOGIE', name: 'Ophtalmologie' }
+            ];
+            
+            // Données mockées pour les médecins
+            main.medecins = [
+                { id: 'MED001', name: 'Amrani', specialty: 'CARDIOLOGIE' },
+                { id: 'MED002', name: 'Alaoui', specialty: 'DERMATOLOGIE' },
+                { id: 'MED003', name: 'Imrane', specialty: 'PEDIATRIE' },
+                { id: 'MED004', name: 'Zahra', specialty: 'GYNECOLOGIE' },
+                { id: 'MED005', name: 'Adnan', specialty: 'OPHTALMOLOGIE' },
+                { id: 'MED006', name: 'Mohammed', specialty: 'CARDIOLOGIE' }
+            ];
+            
+            // Médecins filtrés (par spécialité)
+            main.filteredMedecins = [];
+            
+        // Fonction pour nettoyer les données d'heure mal formatées
+main.cleanTimeData = function(timeString) {
+    if (!timeString) return '';
+    
+    // Si c'est déjà une heure correctement formatée
+    if (typeof timeString === 'string' && timeString.match(/^\d{2}:\d{2}$/)) {
+        return timeString;
+    }
+    
+    // Si c'est une chaîne mal formatée comme "1970-01-01110:00:00.000Z"
+    if (typeof timeString === 'string' && timeString.includes('"')) {
+        // Extraire l'heure de la chaîne
+        const timeMatch = timeString.match(/(\d{2}):\d{2}:\d{2}/);
+        if (timeMatch && timeMatch[1]) {
+            // Reconstruire l'heure au format HH:MM
+            const hour = timeMatch[1];
+            const minuteMatch = timeString.match(/:\d{2}:/);
+            const minute = minuteMatch ? minuteMatch[0].replace(/:/g, '') : '00';
+            return `${hour}:${minute}`;
+        }
+    }
+    
+    // Si c'est un objet Date ou timestamp
+    if (typeof timeString === 'object' || (typeof timeString === 'string' && !isNaN(Date.parse(timeString)))) {
+        const date = new Date(timeString);
+        if (!isNaN(date.getTime())) {
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+    }
+    
+    // Par défaut, retourner une chaîne vide
+    return '';
+};
+
+
+
+
+            // Rendez-vous initiaux
+            main.appointments = [
+                { 
+                    id: 1, 
+                    patientId: 'PAT001', 
+                    medecinId: 'MED001',
+                    date: '2025-09-10', 
+                    time: '10:00', 
+                    reason: 'Consultation générale', 
+                    duration: 30, 
+                    status: 'pending',
+                    createdBy: 'medecin',
+                    creationDate: '01/08/2025',
+                    documents: [
+                        { name: 'analyse_sang.pdf', type: 'pdf' },
+                        { name: 'ordonnance_prev.pdf', type: 'pdf' }
+                    ]
+                },
+                { 
+                    id: 2, 
+                    patientId: 'PAT003', 
+                    medecinId: 'MED003',
+                    date: '2025-09-12', 
+                    time: '14:30', 
+                    reason: 'Suivi traitement', 
+                    duration: 15, 
+                    status: 'approved',
+                    createdBy: 'medecin',
+                    creationDate: '25/07/2025',
+                    documents: [
+                        { name: 'resultat_scan.pdf', type: 'pdf' }
+                    ]
+                },
+                { 
+                    id: 3, 
+                    patientId: 'PAT002', 
+                    medecinId: 'MED002',
+                    date: '2025-09-15', 
+                    time: '11:15', 
+                    reason: 'Examen annuel', 
+                    duration: 45, 
+                    status: 'rejected',
+                    createdBy: 'medecin',
+                    creationDate: '20/07/2025',
+                    refusalReason: "Le médecin demandé n'est pas disponible à cette date"
+                }
+            ];
+            
+            // Nouveau rendez-vous
+            main.newAppointment = {
+                patientId: main.patients[0].id,
+                medecinId: '',
+                date: '',
+                time: '',
+                reason: '',
+                duration: 30,
+                status: 'pending',
+                createdBy: 'medecin',
+                documents: []
+            };
+            
+            // Spécialité sélectionnée
+            main.selectedSpecialty = '';
+            
+            // Patient actuel (pour l'espace patient)
+            main.currentPatient = main.patients[0];
+            
+            // Motif de refus
+            main.refusalReason = '';
+            main.currentAppointmentId = null;
+            
+            // Obtenir le nom d'un patient par son ID
+            main.getPatientName = function(patientId) {
+                var patient = main.patients.find(function(p) {
+                    return p.id === patientId;
+                });
+                return patient ? patient.name : 'Patient inconnu';
+            };
+            
+            // Obtenir le nom d'un médecin par son ID
+            main.getMedecinName = function(medecinId) {
+                var medecin = main.medecins.find(function(m) {
+                    return m.id === medecinId;
+                });
+                return medecin ? 'Dr. ' + medecin.name : 'Médecin inconnu';
+            };
+            
+            // Obtenir les détails d'un patient par son ID
+            main.getPatientById = function(patientId) {
+                return main.patients.find(function(p) {
+                    return p.id === patientId;
+                }) || {};
+            };
+            
+            // Filtrer les médecins par spécialité
+            main.onSpecialtyChange = function() {
+                if (main.selectedSpecialty) {
+                    main.filteredMedecins = main.medecins.filter(function(medecin) {
+                        return medecin.specialty === main.selectedSpecialty;
+                    });
+                } else {
+                    main.filteredMedecins = [];
+                }
+                main.newAppointment.medecinId = ''; // Réinitialiser la sélection du médecin
+            };
+            
+            // Vérifier si le formulaire de rendez-vous est valide
+            main.isAppointmentFormValid = function() {
+                return main.newAppointment.patientId && 
+                       main.newAppointment.medecinId &&
+                       main.newAppointment.date &&
+                       main.newAppointment.time &&
+                       main.newAppointment.reason;
+            };
+            
+            // Se connecter
+            main.login = function(role) {
+                // Masquer la section de login
+                document.getElementById('loginSection').style.display = 'none';
+                
+                // Afficher la section appropriée
+                if (role === 'medecin') {
+                    document.getElementById('medecinSection').style.display = 'block';
+                } else if (role === 'admin') {
+                    document.getElementById('adminSection').style.display = 'block';
+                } else if (role === 'patient') {
+                    // Sélectionner un patient aléatoire pour la démo
+                    main.currentPatient = main.patients[Math.floor(Math.random() * main.patients.length)];
+                    document.getElementById('patientSection').style.display = 'block';
+                }
+            };
+            
+            // Se déconnecter
+            main.logout = function() {
+                // Masquer toutes les sections de fonctionnalités
+                document.getElementById('medecinSection').style.display = 'none';
+                document.getElementById('adminSection').style.display = 'none';
+                document.getElementById('patientSection').style.display = 'none';
+                
+                // Afficher la section de login
+                document.getElementById('loginSection').style.display = 'block';
+            };
+            
+            // Créer un nouveau rendez-vous
+            main.createAppointment = function() {
+                // Générer un ID unique
+                var newId = main.appointments.length > 0 ? 
+                    Math.max.apply(null, main.appointments.map(function(a) { return a.id; })) + 1 : 1;
+                
+                // Créer une copie du nouveau rendez-vous
+                var newApp = angular.copy(main.newAppointment);
+                newApp.id = newId;
+                newApp.creationDate = new Date().toLocaleDateString();
+                
+                // Simuler l'ajout de documents (dans une vraie app, on gérerait les uploads)
+                var fileInput = document.getElementById('medicalFiles');
+                if (fileInput && fileInput.files.length > 0) {
+                    newApp.documents = [];
+                    for (var i = 0; i < fileInput.files.length; i++) {
+                        newApp.documents.push({
+                            name: fileInput.files[i].name,
+                            type: fileInput.files[i].type
+                        });
+                    }
+                }
+                
+                // Ajouter à la liste
+                main.appointments.push(newApp);
+                
+                // Réinitialiser le formulaire
+                main.newAppointment = {
+                    patientId: main.patients[0].id,
+                    medecinId: '',
+                    date: '',
+                    time: '',
+                    reason: '',
+                    duration: 30,
+                    status: 'pending',
+                    createdBy: 'medecin',
+                    documents: []
+                };
+                
+                main.selectedSpecialty = '';
+                main.filteredMedecins = [];
+                
+                // Réinitialiser le champ fichier
+                if (fileInput) {
+                    fileInput.value = '';
+                }
+                
+                // Afficher un message de confirmation
+                alert('Rendez-vous créé avec succès!');
+            };
+            
+            // Afficher le modal pour saisir le motif de refus
+            main.showRefusalReason = function(appId) {
+                main.currentAppointmentId = appId;
+                main.refusalReason = '';
+                var refusalModal = new bootstrap.Modal(document.getElementById('refusalModal'));
+                refusalModal.show();
+            };
+            
+            // Valider ou rejeter un rendez-vous
+            main.validateAppointment = function(appId, decision) {
+                // Trouver le rendez-vous
+                var appointment = main.appointments.find(function(a) {
+                    return a.id === appId;
+                });
+                
+                if (appointment) {
+                    // Mettre à jour le statut
+                    appointment.status = decision;
+                    
+                    // Si c'est un refus, ajouter le motif
+                    if (decision === 'rejected') {
+                        appointment.refusalReason = main.refusalReason;
+                    }
+                    
+                    // Afficher un message de confirmation
+                    if (decision === 'approved') {
+                        alert('Rendez-vous validé avec succès!');
+                    } else {
+                        alert('Rendez-vous rejeté! Le motif a été enregistré.');
+                    }
+                }
+            };
+            
+            // Fonction pour formater une date
+            main.formatDate = function(dateString) {
+                if (!dateString) return 'Date non définie';
+                
+                const date = new Date(dateString);
+                
+                // Gestion des erreurs de date invalide
+                if (isNaN(date.getTime())) {
+                    return 'Date invalide';
+                }
+                
+                // Formatage en JJ/MM/AAAA
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const year = date.getFullYear();
+                
+                return `${day}/${month}/${year}`;
+            };
+
+            // Fonction pour formater l'heure
+           // Fonction pour formater l'heure
+main.formatTime = function(timeString) {
+    if (!timeString) return 'Heure non définie';
+    
+    // Nettoyer les données d'heure
+    const cleanedTime = main.cleanTimeData(timeString);
+    if (cleanedTime) return cleanedTime;
+    
+    // Si c'est un objet Date ou timestamp
+    const date = new Date(timeString);
+    if (!isNaN(date.getTime())) {
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+    
+    return 'Heure invalide';
+};
+        });
+    </script>
+</body>
+</html>
