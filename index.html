@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion de Rendez-vous Médicaux - V2</title>
+    <title>Gestion de Rendez-vous Médicaux </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -78,7 +78,7 @@
         }
         .status-approved {
             background-color: #d4edda;
-            color: #155724;
+            color: #20B2AA;
         }
         .status-rejected {
             background-color: #f8d7da;
@@ -88,7 +88,7 @@
             background-color: white;
             border-radius: 10px;
             padding: 25px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             margin-bottom: 20px;
             text-align: center;
         }
@@ -111,7 +111,7 @@
             border-left-color: #ffc107;
         }
         .appointment-item.approved {
-            border-left-color: #28a745;
+            border-left-color: #20B2AA;
         }
         .appointment-item.rejected {
             border-left-color: #dc3545;
@@ -222,32 +222,32 @@
         }
 
         .action-btn.edit {
-            background-color: #3b82f6;
+            background-color: #20B2AA;
             color: white;
         }
 
         .action-btn.edit:hover {
-            background-color: #2563eb;
+            background-color: #20B2AA;
             transform: translateY(-2px);
         }
 
         .action-btn.delete {
-            background-color: #ef4444;
+            background-color:#20B2AA;
             color: white;
         }
 
         .action-btn.delete:hover {
-            background-color: #dc2626;
+            background-color: #20B2AA;
             transform: translateY(-2px);
         }
 
         .action-btn.view {
-            background-color: #10b981;
+            background-color: #20B2AA;
             color: white;
         }
 
         .action-btn.view:hover {
-            background-color: #059669;
+            background-color: #20B2AA;
             transform: translateY(-2px);
         }
 
@@ -316,13 +316,32 @@
             z-index: 9999;
             min-width: 250px;
         }
+        .btn-success {
+    background-color: #20B2AA !important; /* Applique la couleur */
+    border-color: #20B2AA !important; /* Applique la couleur à la bordure */
+    color: white; /* Assure que le texte reste lisible */
+}
+
+.btn-success:hover {
+    background-color: #1A998F !important; /* Couleur légèrement plus foncée au survol */
+    border-color: #1A998F !important;
+}
+  .btn-outline-primary {
+    color: white !important; /* Couleur du texte */
+    background-color: #20B2AA !important; /* Couleur de fond */
+    border-color: #20B2AA !important; /* Couleur de la bordure */
+  }
+
+  .btn-outline-primary:hover {
+    background-color: #1A998F !important; /* Couleur légèrement plus foncée au survol */
+    border-color: #1A998F !important;}
     </style>
 </head>
 <body>
     <div class="container my-4" ng-app="medApp" ng-controller="MainController as main">
         <!-- Header -->
         <div class="header text-center">
-            <h1><i class="fas fa-hospital-user me-2"></i>Gestionnaire de Rendez-vous Médicaux CHU </h1>
+            <h1><i class="fas fa-hospital-user me-2"></i>Gestionnaire de Rendez-vous Médicaux </h1>
             <p class="lead">Plateforme de gestion des rendez-vous pour médecins, administrateurs et patients</p>
         </div>
 
@@ -342,9 +361,7 @@
                             <i class="fas fa-user-injured me-2"></i>Patient
                         </button>
                     </div>
-                    <div class="mt-4">
-                        <p class="text-muted">Données de démonstration - Toutes les fonctionnalités sont simulées</p>
-                    </div>
+                   
                 </div>
             </div>
         </div>
@@ -368,7 +385,7 @@
                             </button>
                         </div>
                         <div class="card-body">
-                            <h4 class="mb-4">Créer un nouveau rendez-vous</h4>
+                            <h4 class="mb-4" style="color:#20B2AA">Créer un nouveau rendez-vous</h4>
                             
                             <div class="row">
                                 <div class="col-md-6">
@@ -447,12 +464,12 @@
                             
                             <hr class="my-4">
                             
-                            <h4 class="mb-4">Rendez-vous créés</h4>
+                            <h4 class="mb-4" style="color:#20B2AA">Rendez-vous créés</h4>
                             <div class="modern-table-container">
                                 <div ng-if="(main.appointments | filter:{createdBy: 'medecin'}).length === 0" class="empty-table">
                                     <i class="fas fa-calendar-alt"></i>
-                                    <h4>Aucun rendez-vous créé</h4>
-                                    <p>Les rendez-vous que vous créez apparaîtront ici</p>
+                                    <h4 >Aucun rendez-vous créé</h4>
+                                    <p style="color:#20B2AA">Les rendez-vous que vous créez apparaîtront ici</p>
                                 </div>
                                 <table ng-if="(main.appointments | filter:{createdBy: 'medecin'}).length > 0" class="modern-table">
                                     <thead>
@@ -526,7 +543,7 @@
                             </button>
                         </div>
                         <div class="card-body">
-                            <h4 class="mb-4">Rendez-vous en attente de validation</h4>
+                            <h4 class="mb-4" style="color:#20B2AA">Rendez-vous en attente de validation</h4>
                             
                             <div ng-if="(main.appointments | filter:{status: 'pending'}).length === 0" class="alert alert-info">
                                 <i class="fas fa-info-circle me-2"></i>Aucun rendez-vous en attente de validation.
@@ -566,7 +583,7 @@
                             
                             <hr class="my-4">
                             
-                            <h4 class="mb-4">Historique des rendez-vous</h4>
+                            <h4 class="mb-4" style="color:#20B2AA">Historique des rendez-vous</h4>
                             <div class="modern-table-container">
                                 <div ng-if="(main.appointments | filter:{status: '!pending'}).length === 0" class="empty-table">
                                     <i class="fas fa-history"></i>
@@ -642,7 +659,7 @@
                                 <i class="fas fa-info-circle me-2"></i>Bienvenue dans votre espace patient. Vous pouvez consulter l'état de vos rendez-vous ci-dessous.
                             </div>
                             
-                            <h4 class="mb-4">Mes Rendez-vous</h4>
+                            <h4 class="mb-4" style="color:#20B2AA">Mes Rendez-vous</h4>
                             
                             <div ng-if="(main.appointments | filter:{patientId: main.currentPatient.id}).length === 0" class="alert alert-warning">
                                 <i class="fas fa-calendar-times me-2"></i>Vous n'avez aucun rendez-vous planifié.
